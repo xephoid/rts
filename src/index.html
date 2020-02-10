@@ -3,9 +3,23 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+          #interaction1 {
+            position: fixed;
+            top:0;
+          }
+          #interaction2 {
+            position: fixed;
+            top:0;
+            right: 0;
+          }
+        </style>
         <title><%= htmlWebpackPlugin.options.title %></title>
     </head>
     <body>
-        <canvas id="canvas" width="640" height="480"></canvas>
+        <canvas id="canvas" width="1280" height="960"></canvas>
+        <div id="interaction1"></div>
+        <div id="interaction2"></div>
+        <div id="messages"></div>
     </body>
 </html>

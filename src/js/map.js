@@ -1,9 +1,13 @@
+import TreeObject from './objects/tree';
+
 export default class GameMap {
 
   constructor(width, height) {
     this.width = width;
     this.height = height;
     this.layers = [];
+    this.layers[0] = [];
+    this.layers[1] = [];
     this.objects = [];
     this.map = [];
     for (var i=0; i<height; i++) {
@@ -14,18 +18,47 @@ export default class GameMap {
     }
   }
 
+  generate() {
+    for(var n=0; n<10; n++) {
+      const [x, y] = this.randomPoint();
+      const r = Math.floor(Math.random() * 10);
+      for (var i = x - r; i < x + r; i++) {
+        for (var j = y - r; j < y + r; j++) {
+          if (i > 0 && i < this.width && j > 0 && j < this.width && this.distance(x, y, i, j) <= r) {
+            this.layers[0].push(new TreeObject(i, j));
+          }
+        }
+      }
+    }
+    const [firstHomeX, firstHomeY] = this.pickHome();
+    return [[firstHomeX, firstHomeY], this.pickHome(firstHomeY, firstHomeY)];
+  }
+
+  pickHome(notNearX, notNearY) {
+    const nnx = notNearX || 1000;
+    const nny = notNearY || 1000;
+    do {
+      var  [x, y] = this.randomPoint();
+    } while (this.distance(nnx, nny, x, y) < 20 || this.look(x, y, 0, 10, "TREE").length < 5);
+    return [x, y];
+  }
+
   isOccupied(x, y) {
     return this.map[x][y];
   }
 
-  look(x, y, range) {
+  look(x, y, layer, range, type) {
     const result = [];
-    this.objects.forEach((obj) => {
-      if (this.distance(x, y, obj.x, obj.y) <= range) {
+    this.layers[layer].forEach((obj) => {
+      if (obj.isAlive() && this.distance(x, y, obj.x, obj.y) <= range && (!type || type && obj.type === type)) {
         result.push(obj);
       }
     });
     return result;
+  }
+
+  randomPoint() {
+    return [Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height)];
   }
 
   distance(x1, y1, x2, y2) {
