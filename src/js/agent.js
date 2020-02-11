@@ -74,8 +74,7 @@ export default class GameAgent {
     this.soldiers.forEach(s => {
       s.behavior.patrolX = this.home.treesRegionX;
       s.behavior.patrolY = this.home.treesRegionY;
-    })
-    console.log(this.home.treesRegionX, this.home.treesRegionY);
+    });
   }
 
   explore() {
@@ -83,42 +82,47 @@ export default class GameAgent {
   }
 
   createGatherer() {
-    if (this.home.resources >= 50) {
-      this.setResourceRegion();
+    if (this.home.resources >= 15) {
       const gatherer = new GameGatherer(this.player, this.home.x, this.home.y);
       gatherer.behavior = new CollectResourcesBehavior(gatherer, this.map, this.home, this.regionX, this.regionY);
       this.gatherers.push(gatherer);
       this.map.layers[1].push(gatherer);
-      this.home.resources -= 50;
+      this.home.resources -= 15;
     }
   }
 
   createSoldier() {
-    if (this.home.resources >= 100) {
+    if (this.home.resources >= 50) {
       const soldier = new GameSoldier(this.player, this.home);
       soldier.behavior = new PatrolBehavior(soldier, this.map, this.home.x, this.home.y, 10);
       this.soldiers.push(soldier);
       this.map.layers[1].push(soldier);
-      this.home.resources -= 100;
+      this.home.resources -= 50;
     }
   }
 
   createExplorer() {
-    if (this.home.resources >= 75) {
+    if (this.home.resources >= 20) {
       const explorer = new GameExplorer(this.player, this.home.x, this.home.y);
       explorer.behavior = new RandomMovementBehavior(explorer, this.map);
       this.explorers.push(explorer);
       this.map.layers[1].push(explorer);
-      this.home.resources -= 75;
+      this.home.resources -= 20;
     }
   }
 
   defendHome() {
-
+    this.soldiers.forEach(s => {
+      s.behavior.regionX = this.home.x;
+      s.behavior.regionY = this.home.y;
+    });
   }
 
   defendResources() {
-
+    this.soldiers.forEach(s => {
+      s.behavior.regionX = this.home.treesRegionX;
+      s.behavior.regionY = this.home.treesRegionY;
+    });
   }
 
   attack() {
@@ -161,7 +165,5 @@ export default class GameAgent {
       s.behavior.patrolX = this.home.enemiesRegionX;
       s.behavior.patrolY = this.home.enemiesRegionY;
     })
-    console.log(this.home.enemiesRegionX, this.home.enemiesRegionY);
-
   }
 }

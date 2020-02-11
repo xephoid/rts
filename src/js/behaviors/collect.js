@@ -13,20 +13,21 @@ export default class CollectResourcesBehavior extends GameObjectBehavior {
     const self = this;
     if (!this.target) {
       const trees = this.map.look(this.obj.x, this.obj.y, 0, this.obj.sight, "TREE");
+      var closest = 1000;
       trees.forEach((tree) => {
-        if (tree.resources > 0 && !tree.claimed) {
-          if (!self.target) {
-            self.target = tree;
-            self.notfound = 0;
-            self.target.claim(self);
-          }
+        if (tree.resources > 0 && !tree.claimed && (!this.target || this.map.distance(this.obj.x, this.obj.y, tree.x, tree.y) < closest)) {
+          this.target = tree;
+          this.notfound = 0;
+          closest = this.map.distance(this.obj.x, this.obj.y, tree.x, tree.y);
         }
       });
+
       if (!this.target) {
         //console.log("not found", this.home.treesRegionX, this.home.treesRegionY);
         this.notfound++;
         this.moveTowards(this.home.treesRegionX, this.home.treesRegionY);
       } else {
+        this.target.claim(this);
       }
     } else {
       if (this.obj.carrying === this.obj.capacity) {

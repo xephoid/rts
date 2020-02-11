@@ -4,7 +4,7 @@ export default class GameTree extends GameObject {
 
   constructor(x, y) {
     super(null, x, y, 0, 0, "TREE", "https://zeke-rts.s3.amazonaws.com/tree16x16.png");
-    this.resources = 10;
+    this.resources = 15;
   }
 
   claim(obj) {

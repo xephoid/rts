@@ -26,15 +26,12 @@ export default class GameObject {
     const actual = Math.min(this.hp, amount);
     this.hp -= actual;
     if (this.hp < 1) {
-      console.log("DEATH!");
       if (this.type === "GATHERER") {
         if (this.behavior.target) {
-          console.log("unclaim!");
           this.behavior.target.unclaim();
         }
       } else if (this.type == "SOLDIER") {
         if (this.behavior.target) {
-          console.log("Disengage!");
           this.behavior.disengage();
         }
       }
