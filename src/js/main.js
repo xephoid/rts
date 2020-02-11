@@ -22,4 +22,4 @@ const main = () => {
   controller.tick();
 }
 
-setInterval(main, 1000/60);
+controller.interval = setInterval(main, 1000/60);

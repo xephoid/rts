@@ -72,6 +72,13 @@ export default class GameController {
   tick() {
     this.ticks++;
     if (this.ticks >= 10) {
+      if (!this.player1.agent.home.isAlive()) {
+        clearInterval(this.interval);
+        document.getElementById("player2wins").style.display = "block";
+      } else if (!this.player2.agent.home.isAlive()) {
+        clearInterval(this.interval);
+        document.getElementById("player1wins").style.display = "block";
+      }
       this.player1Info.innerHTML = this.getPlayerInfo(this.player1);
       // this.player2Info.innerHTML = this.getPlayerInfo(this.player2);
       this.ticks = 0;
