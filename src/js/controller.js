@@ -33,12 +33,14 @@ export default class GameController {
     this.createButton(div, "Gatherer", () => this.agent1.createGatherer());
     this.createButton(div, "Explorer", () => this.agent1.createExplorer());
     this.createButton(div, "Soldier", () => this.agent1.createSoldier());
+    this.createButton(div, "Attack!", () => this.agent1.attack());
 
     const div2 = document.getElementById("interaction2");
     this.createButton(div2, "Region", () => this.agent2.setResourceRegion());
     this.createButton(div2, "Gatherer", () => this.agent2.createGatherer());
     this.createButton(div2, "Explorer", () => this.agent2.createExplorer());
     this.createButton(div2, "Soldier", () => this.agent2.createSoldier());
+    this.createButton(div2, "Attack!", () => this.agent2.attack());
 
     this.player1Info = document.createElement("div");
     this.player1Info.style.background = '#fff';
