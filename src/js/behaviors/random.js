@@ -20,6 +20,8 @@ export default class RandomMovementBehavior extends GameObjectBehavior {
     }
 
     if (this.map.distance(this.obj.x, this.obj.y, this.targetX, this.targetY) <= this.obj.speed) {
+      this.obj.player.agent.setResourceRegion();
+      this.obj.player.agent.explore();
       this.setRandomTarget();
     }
   }

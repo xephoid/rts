@@ -31,7 +31,7 @@ export default class GameMap {
       }
     }
     const [firstHomeX, firstHomeY] = this.pickHome();
-    return [[firstHomeX, firstHomeY], this.pickHome(firstHomeY, firstHomeY)];
+    return [[firstHomeX, firstHomeY], this.pickHome(firstHomeX, firstHomeY)];
   }
 
   pickHome(notNearX, notNearY) {
@@ -39,7 +39,8 @@ export default class GameMap {
     const nny = notNearY || 1000;
     do {
       var  [x, y] = this.randomPoint();
-    } while (this.distance(nnx, nny, x, y) < 20 || this.look(x, y, 0, 10, "TREE").length < 5);
+      console.log("distance", this.distance(nnx, nny, x, y), "trees", this.look(x, y, 0, 5, "TREE").length);
+    } while (this.distance(nnx, nny, x, y) < 20 || this.look(x, y, 0, 5, "TREE").length < 50);
     return [x, y];
   }
 

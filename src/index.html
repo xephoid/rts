@@ -18,9 +18,10 @@
           }
           #player1wins, #player2wins {
             display: none;
-            margin: 250px;
+            margin: 250px 400px;
             color: red;
             font-size: 72px;
+            font-family: fantasy;
             width: 100%;
             position: fixed;
           }
@@ -28,8 +29,8 @@
         <title><%= htmlWebpackPlugin.options.title %></title>
     </head>
     <body>
-        <div id="player1wins"><h1>Player 1 wins!</h1></div>
-        <div id="player2wins"><h1>Player 2 wins!</h1></div>
+        <div id="player1wins"><h1>Victory!</h1></div>
+        <div id="player2wins"><h1>Defeat!</h1></div>
         <canvas id="canvas" width="1280" height="960"></canvas>
         <div id="interaction1"></div>
         <div id="interaction2"></div>

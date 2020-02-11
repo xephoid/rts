@@ -70,15 +70,43 @@ export default class GameAgent {
         }
       }
     }
-
-    this.soldiers.forEach(s => {
-      s.behavior.patrolX = this.home.treesRegionX;
-      s.behavior.patrolY = this.home.treesRegionY;
-    });
   }
 
   explore() {
-    
+    const enemies = this.map.look(this.home.x, this.home.y, 1, this.home.sight).filter(e => e.player.number != this.player.number);
+    this.soldiers.filter(s => s.isAlive()).forEach(s => this.map.look(s.x, s.y, 1, s.sight).filter(e => e.player.number != this.player.number).forEach(e => enemies.push(e)));
+    this.gatherers.filter(g => g.isAlive()).forEach((s) => {
+      const found = this.map.look(s.x, s.y, 1, s.sight).filter(e => e.player.number != this.player.number);
+      found.forEach(e => enemies.push(e));
+    });
+    this.explorers.filter(e => e.isAlive()).forEach((s) => { 
+      const found = this.map.look(s.x, s.y, 1, s.sight).filter(e => e.player.number != this.player.number);
+      found.forEach((t) => enemies.push(t));
+    });
+
+    if (!this.home.knownEnemies) {
+      this.home.knownEnemies = this.knowlegeArray();
+    }
+    const knownEnemies = this.knowlegeArray();
+    try {
+      enemies.forEach((t) => {
+        knownEnemies[Math.floor(t.y/10)][Math.floor(t.x/10)] += t.threat;
+      });
+    } catch(e) {
+      console.log("Exception!", e, knownEnemies);
+    }
+
+    var densest = 0;
+    for (var i=0; i < knownEnemies.length; i++) {
+      for (var j=0; j < knownEnemies[i].length; j++) {
+        this.home.knownEnemies[i][j] = (knownEnemies[i][j] + this.home.knownEnemies[i][j]) / 2;
+        if (this.home.knownEnemies[i][j] > densest) {
+          this.home.enemiesRegionX = (j * 10) + 5;
+          this.home.enemiesRegionY = (i * 10) + 5;
+          densest = this.home.knownEnemies[i][j];
+        }
+      }
+    }
   }
 
   createGatherer() {
@@ -126,44 +154,9 @@ export default class GameAgent {
   }
 
   attack() {
-    const enemies = this.map.look(this.home.x, this.home.y, 1, this.home.sight).filter(e => e.player.number != this.player.number);
-    this.soldiers.filter(s => s.isAlive()).forEach(s => this.map.look(s.x, s.y, 1, s.sight).filter(e => e.player.number != this.player.number).forEach(e => enemies.push(e)));
-    this.gatherers.filter(g => g.isAlive()).forEach((s) => {
-      const found = this.map.look(s.x, s.y, 1, s.sight).filter(e => e.player.number != this.player.number);
-      found.forEach(e => enemies.push(e));
-    });
-    this.explorers.filter(e => e.isAlive()).forEach((s) => { 
-      const found = this.map.look(s.x, s.y, 1, s.sight).filter(e => e.player.number != this.player.number);
-      found.forEach((t) => enemies.push(t));
-    });
-
-    if (!this.home.knownEnemies) {
-      this.home.knownEnemies = this.knowlegeArray();
-    }
-    const knownEnemies = this.knowlegeArray();
-    try {
-      enemies.forEach((t) => {
-        knownEnemies[Math.floor(t.y/10)][Math.floor(t.x/10)] += t.threat;
-      });
-    } catch(e) {
-      console.log("Exception!", e, knownEnemies);
-    }
-
-    var densest = 0;
-    for (var i=0; i < knownEnemies.length; i++) {
-      for (var j=0; j < knownEnemies[i].length; j++) {
-        this.home.knownEnemies[i][j] = (knownEnemies[i][j] + this.home.knownEnemies[i][j]) / 2;
-        if (this.home.knownEnemies[i][j] > densest) {
-          this.home.enemiesRegionX = (j * 10) + 5;
-          this.home.enemiesRegionY = (i * 10) + 5;
-          densest = this.home.knownEnemies[i][j];
-        }
-      }
-    }
-
     this.soldiers.forEach(s => {
       s.behavior.patrolX = this.home.enemiesRegionX;
       s.behavior.patrolY = this.home.enemiesRegionY;
-    })
+    });
   }
 }

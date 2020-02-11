@@ -30,10 +30,11 @@ export default class GameController {
     this.agent2.home = home2;
 
     const div = document.getElementById("interaction1");
-    this.createButton(div, "Region", () => this.agent1.setResourceRegion());
-    this.createButton(div, "Gatherer", () => this.agent1.createGatherer());
-    this.createButton(div, "Explorer", () => this.agent1.createExplorer());
-    this.createButton(div, "Soldier", () => this.agent1.createSoldier());
+    this.createButton(div, "Defend", () => this.agent1.defendHome());
+    this.createButton(div, "Resources", () => this.agent1.defendResources());
+    this.createButton(div, "Gatherer (15)", () => this.agent1.createGatherer());
+    this.createButton(div, "Explorer (20)", () => this.agent1.createExplorer());
+    this.createButton(div, "Soldier (50)", () => this.agent1.createSoldier());
     this.createButton(div, "Attack!", () => this.agent1.attack());
 
     // const div2 = document.getElementById("interaction2");
@@ -66,7 +67,7 @@ export default class GameController {
     const gatherers = player.agent.gatherers.filter(g => g.isAlive()).length;
     const explorers = player.agent.explorers.filter(e => e.isAlive()).length;
     const soldiers = player.agent.soldiers.filter(s => s.isAlive()).length;
-    return `Resources: ${resources} Gatherers: ${gatherers}<br/> Explorers: ${explorers} Soldiers: ${soldiers}`;
+    return `Resources: ${resources} Gatherers: ${gatherers} Explorers: ${explorers} Soldiers: ${soldiers} Health: ${player.agent.home.hp}/350`;
   }
 
   tick() {
