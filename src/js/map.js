@@ -37,10 +37,12 @@ export default class GameMap {
   pickHome(notNearX, notNearY) {
     const nnx = notNearX || 1000;
     const nny = notNearY || 1000;
+    let count = 0;
     do {
       var  [x, y] = this.randomPoint();
-      console.log("distance", this.distance(nnx, nny, x, y), "trees", this.look(x, y, 0, 5, "TREE").length);
-    } while (this.distance(nnx, nny, x, y) < 20 || this.look(x, y, 0, 5, "TREE").length < 50);
+      count++;
+      //console.log("distance", this.distance(nnx, nny, x, y), "trees", this.look(x, y, 0, 5, "TREE").length);
+    } while (count < 1000 && (this.distance(nnx, nny, x, y) < 20 || this.look(x, y, 0, 5, "TREE").length < 50));
     return [x, y];
   }
 

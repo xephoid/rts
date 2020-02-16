@@ -16,6 +16,7 @@ export default class GameObject {
       [null, "X", null],
       [null, null, null]
     ]
+    this.kills = 0;
   }
 
   isAlive() {

@@ -60,27 +60,27 @@ export default class Gfx {
           if (object.isAlive()) {
             this.ctx.drawImage(this.images[object.img], object.x * this.tileSize, object.y * this.tileSize);
             
-            if (object.player && object.player.number === 1) {
-              for (var i=-Math.ceil(object.sight/2); i < Math.ceil(object.sight/2); i++) {
-                for (var j=-Math.ceil(object.sight/2); j < Math.ceil(object.sight/2); j++) {
-                  if (object.x + i >= 0 && object.x + i < this.map.width && object.y + j >= 0 && object.y + j < this.map.height 
-                    && this.map.distance(object.x, object.y, object.x + i, object.y + j) <= object.sight) {
-                    fog[object.x + i][object.y + j] = 1;
-                  }
-                }
-              }
-            }
+            // if (object.player && object.player.number === 1) {
+            //   for (var i=-Math.ceil(object.sight/2); i < Math.ceil(object.sight/2); i++) {
+            //     for (var j=-Math.ceil(object.sight/2); j < Math.ceil(object.sight/2); j++) {
+            //       if (object.x + i >= 0 && object.x + i < this.map.width && object.y + j >= 0 && object.y + j < this.map.height 
+            //         && this.map.distance(object.x, object.y, object.x + i, object.y + j) <= object.sight) {
+            //         fog[object.x + i][object.y + j] = 1;
+            //       }
+            //     }
+            //   }
+            // }
           }
         });
       });
 
-      for (var i=0; i < this.map.width; i++) {
-        for (var j=0; j < this.map.width; j++) {
-          if (fog[i][j] === 0) {
-            this.ctx.fillRect(i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
-          }
-        }
-      }
+      // for (var i=0; i < this.map.width; i++) {
+      //   for (var j=0; j < this.map.width; j++) {
+      //     if (fog[i][j] === 0) {
+      //       this.ctx.fillRect(i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
+      //     }
+      //   }
+      // }
     }
   }
 }

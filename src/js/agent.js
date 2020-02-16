@@ -72,6 +72,41 @@ export default class GameAgent {
     }
   }
 
+  assesstUnits() {
+    
+    if (!this.home.knownForces) {
+      this.home.knownForces = this.knowlegeArray();
+    }
+    const knownForces = this.knowlegeArray();
+    try {
+      this.soldiers.filter(s => s.isAlive()).forEach((t) => {
+        knownForces[Math.floor(t.y/10)][Math.floor(t.x/10)] += t.threat;
+      });
+      this.gatherers.filter(g => g.isAlive()).forEach((t) => {
+        knownForces[Math.floor(t.y/10)][Math.floor(t.x/10)] += t.threat;
+      });
+      this.explorers.filter(e => e.isAlive()).forEach((t) => {
+        knownForces[Math.floor(t.y/10)][Math.floor(t.x/10)] += t.threat;
+      });
+    } catch(e) {
+      console.log("Exception!", e, knownForces);
+    }
+
+    // var densest = 0;
+    for (var i=0; i < knownForces.length; i++) {
+      for (var j=0; j < knownForces[i].length; j++) {
+        this.home.knownForces[i][j] = (knownForces[i][j] + this.home.knownForces[i][j]) / 2;
+        // if (this.home.knownEnemies[i][j] > densest) {
+        //   this.home.enemiesRegionX = (j * 10) + 5;
+        //   this.home.enemiesRegionY = (i * 10) + 5;
+        //   densest = this.home.knownEnemies[i][j];
+        // }
+      }
+    }
+
+    return this.soldiers.length > 0 || this.gatherers.length > 0 || this.explorers.length > 0;
+  }
+
   explore() {
     const enemies = this.map.look(this.home.x, this.home.y, 1, this.home.sight).filter(e => e.player.number != this.player.number);
     this.soldiers.filter(s => s.isAlive()).forEach(s => this.map.look(s.x, s.y, 1, s.sight).filter(e => e.player.number != this.player.number).forEach(e => enemies.push(e)));
@@ -116,6 +151,9 @@ export default class GameAgent {
       this.gatherers.push(gatherer);
       this.map.layers[1].push(gatherer);
       this.home.resources -= 15;
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -126,6 +164,9 @@ export default class GameAgent {
       this.soldiers.push(soldier);
       this.map.layers[1].push(soldier);
       this.home.resources -= 50;
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -136,6 +177,9 @@ export default class GameAgent {
       this.explorers.push(explorer);
       this.map.layers[1].push(explorer);
       this.home.resources -= 20;
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -144,6 +188,8 @@ export default class GameAgent {
       s.behavior.regionX = this.home.x;
       s.behavior.regionY = this.home.y;
     });
+
+    return this.soldiers.lenght > 0;
   }
 
   defendResources() {
@@ -151,6 +197,7 @@ export default class GameAgent {
       s.behavior.regionX = this.home.treesRegionX;
       s.behavior.regionY = this.home.treesRegionY;
     });
+    return this.soldiers.lenght > 0;
   }
 
   attack() {
@@ -158,5 +205,6 @@ export default class GameAgent {
       s.behavior.patrolX = this.home.enemiesRegionX;
       s.behavior.patrolY = this.home.enemiesRegionY;
     });
+    return this.soldiers.lenght > 0;
   }
 }
