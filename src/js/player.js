@@ -3,7 +3,8 @@ export default class GamePlayer {
   constructor(number, agent) {
     this.number = number;
     this.agent = agent;
-    this.name = "Unamed";
+    this.name = null;
+    this.loses = 0;
   }
 
   think() {

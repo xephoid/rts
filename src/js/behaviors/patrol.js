@@ -34,7 +34,7 @@ export default class PatrolBehavior extends GameObjectBehavior {
         } else if (this.map.distance(this.obj.x, this.obj.y, this.target.x, this.target.y) < 2) {
           this.target.damage(this.obj.dmg);
           if (this.target.hp < 1) {
-            this.obj.kills++;
+            this.obj.kills += this.target.threat;
           }
         } else {
           this.moveTowards(this.target.x + this.sideX, this.target.y + this.sideY);

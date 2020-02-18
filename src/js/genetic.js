@@ -207,7 +207,6 @@ export default class GeneticAlgorithm {
     const {mutationThreshold=0.2, mutationChangeVariance=0.1} = opts
     const mutate = Math.random() < mutationThreshold
     let finalWeights = weights
-    
     if (mutate) {
       finalWeights =  tf.tidy(() => {
         // The mutated weights are a copy of the weights in which a specific location 

@@ -30,8 +30,8 @@ export default class TensorPlayer extends GamePlayer {
       tf.tidy(() => {
         const normalizedResoures = tf.tensor2d(this.normalize(this.agent.home.knownTrees, 1500)).flatten();
         const normalizedEnemies = tf.tensor2d(this.normalize(this.agent.home.knownEnemies, 200)).flatten();
-        const units = tf.tensor1d([this.agent.soldiers.length, this.agent.gatherers.length, this.agent.explorers.length]);
-        const input = tf.concat([tf.tensor1d([time, this.agent.home.hp/350, this.agent.home.resources / 5000]), units, normalizedResoures, normalizedEnemies]);
+        const units = tf.tensor1d([this.agent.soldiers.length/100, this.agent.gatherers.length/100, this.agent.explorers.length/100]);
+        const input = tf.concat([tf.tensor1d([time/1000, this.agent.home.hp/350, this.agent.home.resources / 1000]), units, normalizedResoures, normalizedEnemies]);
         const output = this.model.predict(input).dataSync();
         let highest = -200, index = 0;
         for (let i = 0; i < 7; i++) {
@@ -85,12 +85,13 @@ export default class TensorPlayer extends GamePlayer {
       //+ this.total(this.agent.home.knownTrees)
     // return this.lifespan / 1000
     //   + this.agent.soldiers.reduce((acc, s) => s.kills + acc, 0)
-    return this.baseFitness.reduce((acc, v) => acc += (v > 0 ? 1 : 0), 0) 
+    return this.baseFitness.reduce((acc, v) => acc += (v > 0 ? 1 : 0), 0)
+      + this.useRates.reduce((acc, v) => acc += (v > 0 ? 0.1 : 0), 0)
       + (this.agent.home.hp/350) 
-      + parseFloat((this.agent.home.resources/10000).toFixed(2))
       + (this.agent.soldiers.length > 0 ? 1 : 0) 
       + (this.agent.gatherers.length > 0 ? 1: 0) 
       + (this.agent.explorers.length > 0 ? 1 : 0)
-      //+ this.agent.soldiers.reduce((acc, s) => s.kills + acc, 0);
+      + (this.agent.soldiers.reduce((acc, s) => s.kills + acc, 0) > 100 ? 1 : 0)
+      - this.model.gameLoses;
   }
 }

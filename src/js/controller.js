@@ -7,9 +7,10 @@ import GameMap from "./map";
 import GeneticAlgorithm from './genetic';
 
 const HIDDEN_LAYERS = 1;
-const HIDDEN_NUERONS = 16;
-const KERNEL = 'leCunNormal';
+const HIDDEN_NUERONS = 8;
+const KERNEL = tf.initializers.randomUniform({minval: -1, maxval: 1});
 const ACTIVATION = 'tanh';
+
 export default class GameController {
 
   constructor(gfx) {
@@ -43,7 +44,6 @@ export default class GameController {
     this.agent1 = new GameAgent(this.map);
     this.agent2 = new GameAgent(this.map);
     this.shuffle(this.population);
-    console.log(this.population);
 
     this.player1 = new TensorPlayer(1, this.agent1, this.population.pop());
     this.player2 = new TensorPlayer(2, this.agent2, this.population.pop());
@@ -62,6 +62,13 @@ export default class GameController {
     this.winnersByFitness = {};
     this.totalUnits = 0;
     this.idleTime = 0;
+
+    if (!this.player1.model.gameLoses) {
+      this.player1.model.gameLoses = 0;
+    }
+    if (!this.player2.model.gameLoses) {
+      this.player2.model.gameLoses = 0;
+    }
   }
 
   setupUI() {
@@ -116,13 +123,23 @@ export default class GameController {
         }
         if (!this.player1.agent.home.isAlive()) {
           //document.getElementById("player2wins").style.display = "block";
+          console.log("Player 2 wins!");
+          this.player1.model.gameLoses++;
           this.gameOver = true;
         } else if (!this.player2.agent.home.isAlive()) {
           //document.getElementById("player1wins").style.display = "block";
+          console.log("Player 1 wins!");
+          this.player2.model.gameLoses++;
           this.gameOver = true;
-        } else if (this.idleTime > 300 || this.time > 800) {
+        } else if (this.idleTime > 300 || this.time > 600 + (this.generation * 50)) {
           //document.getElementById("player1wins").innerHTML = "<h1>Time up!</h1>";
           //document.getElementById("player1wins").style.display = "block";
+          //if (this.player2.fitness() < this.player1.fitness()) {
+            this.player2.model.gameLoses++;
+          //} else {
+            this.player1.model.gameLoses++;
+          //}
+          console.log("Time up!");
           this.gameOver = true;
         }
         
@@ -137,15 +154,24 @@ export default class GameController {
         this.gfx.draw();
       }
     } else {
-      this.player1.name = "G"+ this.generation + "_P1_" + this.player1.characteristics()[0].name;
-      this.player2.name = "G"+ this.generation + "_P2_" + this.player2.characteristics()[0].name;
+      if (!this.player1.name) {
+        this.player1.name = "G"+ this.generation + "_P1_" + this.player1.characteristics()[0].name + "_" + this.player1.model.breed + "_" + this.player1.fitness();
+      }
+      if (!this.player2.name) {
+        this.player2.name = "G"+ this.generation + "_P2_" + this.player2.characteristics()[0].name + "_" + this.player2.model.breed + "_" + this.player2.fitness();
+      }
 
-      console.log(this.player1.name, this.player1.fitness(), this.player2.name, this.player2.fitness(), this.player1.characteristics(), this.player2.characteristics());
+      console.log(this.player1.name, this.player2.name, this.player1.characteristics(), this.player2.characteristics());
 
       this.oldPlayers.push(this.player1);
       this.oldPlayers.push(this.player2);
+      this.shuffle(this.oldPlayers);
       if (this.population.length < 1) {
         this.winners = this.oldPlayers.sort((a, b) => a.fitness() - b.fitness()).reverse().slice(0, 4);
+        this.winners.filter(w => w.fitness() > 8.5).filter(w => !w.saved).forEach(w => {
+          w.model.save("downloads://rts\/" + w.name)
+          w.saved = true;
+        });
         console.log("winners", this.winners.map(w => w.name));
         this.shuffle(this.winners);
         this.evolvePopulation(this.winners.map(w => w.model));
@@ -159,29 +185,32 @@ export default class GameController {
 
   evolvePopulation(winners) {
     console.log("Evolving...", winners);
-    const crossover1Tensors = this.crossOver2(winners[0], winners[1]);
-
-    const crossover1 = this.createModel(null, 2);
-    crossover1Tensors.forEach((w,i) => {
-      crossover1.weights[i] = tf.tidy(() => crossover1.weights[i].write(w));
-    });
-
-    const crossover2Tensors = this.crossOver2(winners[2], winners[3]);
-    const crossover2 = this.createModel(null, 2);
-    crossover2Tensors.forEach((w,i) => {
-      crossover2.weights[i] = tf.tidy(() => crossover2.weights[i].write(w));
-    });
  
-    const mutatedWinners = this.mutateBias(winners.slice(0, 4));
+    const mutatedWinners = winners.slice(0, 2)
+      .map(winner => winner.getWeights().map(w => this.ga.mutate(w)))
+      .map(weights => {
+        const m = this.createModel(null, "M");
+        weights.forEach((w, i) => m.weights[i] = tf.tidy(() => m.weights[i].write(w)));
+        return m;
+      });
+    //const mutatedWinners = this.mutateBias(winners);
  
-    this.population = [crossover1, crossover2, ...winners.slice(0, 4), ...mutatedWinners];
+    this.population = [
+      this.crossOver(winners[0], winners[1]), 
+      this.crossOver(winners[2], winners[3]), 
+      this.createModel(null, "N"),
+      this.createModel(null, "N"),
+      ...winners.slice(0, 4), ...mutatedWinners];
   }
 
   crossOver(a, b) {
-    const biasA = a.layers[1].bias.read();
-    const biasB = b.layers[1].bias.read();
- 
-    return this.setBias(a, this.exchangeBias(biasA, biasB));
+    const crossoverTensors = this.crossOver2(a, b).map(w => this.ga.mutate(w, { mutationThreshold: 1, mutationChangeVariance: 1 }));
+
+    const crossover = this.createModel(null, 'C');
+    crossoverTensors.forEach((w,i) => {
+      crossover.weights[i] = tf.tidy(() => crossover.weights[i].write(w));
+    });
+    return crossover;
   }
 
   exchangeBias(tensorA, tensorB) {
@@ -209,13 +238,13 @@ export default class GameController {
           useBias: true,
           activation: ACTIVATION,
           kernelInitializer: KERNEL,
-          biasInitializer: tf.initializers.randomUniform({minval: -1, maxval: 1}),
+          biasInitializer: tf.initializers.randomNormal({minval: -1, maxval: 1}),
           //biasInitializer: tf.initializers.constant({
           //   value: this.random(-2, 2),
           // }),
         };
  
-        return this.createModel(hiddenLayer);
+        return this.createModel(hiddenLayer, "M");
     });
   }
 
@@ -226,16 +255,14 @@ export default class GameController {
     });
   }
 
-  createModel(hidden, layers) {
+  createModel(hidden, breed) {
     let model = tf.sequential();
-
+    model.breed = breed || "N";
     let inputLayer = this.createLayer({
       units: 131,
       useBias: true,
       activation: ACTIVATION,
       inputDim: 1, // 63 resources + 63 enemies + 3 unit counts + resources + home hp
-      kernelInitializer: KERNEL,
-      biasInitializer: 'randomNormal',
     });
     model.add(inputLayer);
     
@@ -246,7 +273,7 @@ export default class GameController {
         useBias: true,
         activation: ACTIVATION,
         kernelInitializer: KERNEL,
-        biasInitializer: 'randomNormal',
+        biasInitializer: tf.initializers.randomNormal({minval: -1, maxval: 1}),
       }));
     }
     
@@ -301,7 +328,7 @@ export default class GameController {
             const pickedParent = Math.random() < 0.5 ? 0 : 1
             return pLayer[pickedParent].slice([i], [1])
           })
-          return tf.concat([...neurons])            
+          return tf.concat([...neurons])
         } else if (layerShape.length == 2) {
           // for each index, construct a neuron by crossovering weights
           const neurons = [...new Array(layerShape[1])].map((d,i) => {

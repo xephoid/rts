@@ -31,7 +31,7 @@ export default class GameAgent {
 
   act() {
     this.gatherers.filter(g => g.isAlive()).forEach(g => g.behavior.tick());
-    this.explorers.filter(e => e.isAlive()).forEach(e => e.behavior.tick());
+    this.explorers.filter(e => e.isAlive()).shuffle().slice(0, 20).forEach(e => e.behavior.tick());
     this.soldiers.filter(s => s.isAlive()).forEach(s => s.behavior.tick());
   }
 
@@ -56,7 +56,7 @@ export default class GameAgent {
         knownTrees[Math.floor(t.y/10)][Math.floor(t.x/10)] += t.resources;
       });
     } catch(e) {
-      console.log("Exception!", e, knownTrees);
+      //console.log("Exception!");
     }
 
     var densest = 0;
@@ -89,7 +89,7 @@ export default class GameAgent {
         knownForces[Math.floor(t.y/10)][Math.floor(t.x/10)] += t.threat;
       });
     } catch(e) {
-      console.log("Exception!", e, knownForces);
+      //console.log("Exception!", e, knownForces);
     }
 
     // var densest = 0;
@@ -128,7 +128,7 @@ export default class GameAgent {
         knownEnemies[Math.floor(t.y/10)][Math.floor(t.x/10)] += t.threat;
       });
     } catch(e) {
-      console.log("Exception!", e, knownEnemies);
+      // console.log("Exception!");
     }
 
     var densest = 0;
