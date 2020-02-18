@@ -14,7 +14,7 @@ const ACTION_NAMES = {
 export default class TensorPlayer extends GamePlayer {
 
   constructor(number, agent, model) {
-    super(number, agent);
+    super(number, agent, "TENSOR_AI");
     this.model = model;
     this.baseFitness = [0,0,0,0,0,0,0];
     this.useRates = [0,0,0,0,0,0,0,0];

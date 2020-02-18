@@ -28,25 +28,50 @@ export default class GameController {
 
     this.ga = new GeneticAlgorithm(this.population);
 
-    this.setup();
-    this.setupUI();
     this.gfx.load();
   }
 
-  setup() {
+  start() {
+    this.interval = setInterval(this.tick, 1000/60);
+  }
+
+  createPlayer(number, agent, type, files) {
+    let player;
+    switch (type) {
+      case "DUMB_AI": player = new DumbAIPlayer(number, agent); break;
+      case "TENSOR_AI": {
+        const model = await tf.loadLayersModel(
+          tf.io.browserFiles([files[0].files[0], files[1].files[0]]));
+          player = new TensorPlayer(number, agent, model);
+        break;
+      }
+      default: player = new GamePlayer(number, agent); break;
+    }
+    return player;
+  }
+
+  setup(maxGenerations, speed, player1Type, player2Type, player1Files, player2Files) {
     this.map = new GameMap(80, 60);
     this.gfx.map = this.map;
     this.ticks = 0;
     this.time = 0;
     this.gameOver = false;
+    this.speed = speed;
+    this.maxGenerations = maxGenerations;
     const [[home1X, home1Y],[home2X, home2Y]] = this.map.generate();
 
     this.agent1 = new GameAgent(this.map);
     this.agent2 = new GameAgent(this.map);
-    this.shuffle(this.population);
 
-    this.player1 = new TensorPlayer(1, this.agent1, this.population.pop());
-    this.player2 = new TensorPlayer(2, this.agent2, this.population.pop());
+    if (player1Type === "TENSOR_AI" && player2Type === "TENSOR_AI") {
+      this.shuffle(this.population);
+      this.player1 = new TensorPlayer(1, this.agent1, this.population.pop());
+      this.player2 = new TensorPlayer(2, this.agent2, this.population.pop());
+    } else {
+      this.player1 = this.createPlayer(1, this.agent1, player1Type, player1Files);
+      this.player2 = this.createPlayer(2, this.agent2, player2Type, player2Files);
+    }
+
     const home1 = new GamePortal(home1X, home1Y, this.player1);
     const home2 = new GamePortal(home2X, home2Y, this.player2);
     this.map.layers[1].push(home1);
@@ -69,37 +94,6 @@ export default class GameController {
     if (!this.player2.model.gameLoses) {
       this.player2.model.gameLoses = 0;
     }
-  }
-
-  setupUI() {
-    const div = document.getElementById("interaction1");
-    // this.createButton(div, "Defend", () => this.agent1.defendHome());
-    // this.createButton(div, "Resources", () => this.agent1.defendResources());
-    // this.createButton(div, "Gatherer (15)", () => this.agent1.createGatherer());
-    // this.createButton(div, "Explorer (20)", () => this.agent1.createExplorer());
-    // this.createButton(div, "Soldier (50)", () => this.agent1.createSoldier());
-    // this.createButton(div, "Attack!", () => this.agent1.attack());
-
-    const div2 = document.getElementById("interaction2");
-    // this.createButton(div2, "Region", () => this.agent2.setResourceRegion());
-    // this.createButton(div2, "Gatherer", () => this.agent2.createGatherer());
-    // this.createButton(div2, "Explorer", () => this.agent2.createExplorer());
-    // this.createButton(div2, "Soldier", () => this.agent2.createSoldier());
-    // this.createButton(div2, "Attack!", () => this.agent2.attack());
-
-    this.player1Info = document.createElement("div");
-    this.player1Info.style.background = '#fff';
-    this.player2Info = document.createElement("div");
-    this.player2Info.style.background = '#fff';
-    div.appendChild(this.player1Info);
-    div2.appendChild(this.player2Info);
-  }
-
-  createButton(div, label, onclick) {
-    const button = document.createElement("button");
-    button.innerText = label;
-    button.onclick = onclick;
-    div.appendChild(button);
   }
 
   getPlayerInfo(player) {
@@ -179,7 +173,11 @@ export default class GameController {
         console.log("Generation " + this.generation);
       }
       
-      this.setup();
+      if (this.generation >= this.maxGenerations) {
+        clearInterval(this.interval);
+      } else {
+        this.setup(this.maxGenerations, this.speed, this.player1.type, this.player2.type);
+      }
     }
   }
 

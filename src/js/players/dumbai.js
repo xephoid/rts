@@ -3,7 +3,7 @@ import GamePlayer from "../player";
 export default class DumbAIPlayer extends GamePlayer {
 
   constructor(number, agent) {
-    super(number, agent);
+    super(number, agent, "DUMB_AI");
   }
 
   think() {
