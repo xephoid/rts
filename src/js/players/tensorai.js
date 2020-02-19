@@ -91,8 +91,8 @@ export default class TensorPlayer extends GamePlayer {
       + (this.agent.soldiers.length > 0 ? 1 : 0) 
       + (this.agent.gatherers.length > 0 ? 1: 0) 
       + (this.agent.explorers.length > 0 ? 1 : 0)
-      + (this.agent.soldiers.reduce((acc, s) => s.kills + acc, 0) > 100 ? 1 : 0)
-      + parseFloat((this.agent.home.resources/10000).toFixed(2))
+      + (this.agent.soldiers.reduce((acc, s) => s.kills + acc, 0) / 1000)
+      + (this.agent.home.resources/10000)
       - this.model.gameLoses;
   }
 }
