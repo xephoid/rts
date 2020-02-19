@@ -6,7 +6,7 @@ import TensorPlayer from "./players/tensorai";
 import GameMap from "./map";
 import GeneticAlgorithm from './genetic';
 
-const HIDDEN_LAYERS = 1;
+const HIDDEN_LAYERS = 3;
 const HIDDEN_NUERONS = 8;
 const KERNEL = tf.initializers.randomUniform({minval: -1, maxval: 1});
 const ACTIVATION = 'tanh';
@@ -35,7 +35,7 @@ export default class GameController {
     console.log("start!");
     if (this.player1.type === "TENSOR_AI" && this.player2.type === "TENSOR_AI") {
       for (let i = 0; i < 10; i++) {
-        this.population.push(this.createModel());
+        this.population.push(this.createModel(null, "O"));
       }
     }
   }
@@ -43,15 +43,16 @@ export default class GameController {
   async createPlayer(number, agent, type, files) {
     let player;
     switch (type) {
-      case "DUMB_AI": player = new DumbAIPlayer(number, agent); break;
+      case "DUMB_AI": player = new DumbAIPlayer(number, agent); player.name = "Idiot"; break;
       case "TENSOR_AI": {
         console.log(files, files[0].files[0], files[1].files[0]);
         const model = await tf.loadLayersModel(
           tf.io.browserFiles([files[0].files[0], files[1].files[0]]));
-          player = new TensorPlayer(number, agent, model);
+        model.breed = "L";
+        player = new TensorPlayer(number, agent, model);
         break;
       }
-      default: player = new GamePlayer(number, agent); break;
+      default: player = new GamePlayer(number, agent); player.name = "Puny Human"; break;
     }
     return player;
   }
@@ -136,9 +137,13 @@ export default class GameController {
           //document.getElementById("player1wins").innerHTML = "<h1>Time up!</h1>";
           //document.getElementById("player1wins").style.display = "block";
           //if (this.player2.fitness() < this.player1.fitness()) {
-            this.player2.model.gameLoses++;
+            if (this.player2.model) {
+              this.player2.model.gameLoses++;
+            }
           //} else {
-            this.player1.model.gameLoses++;
+            if (this.player1.model) {
+              this.player1.model.gameLoses++;
+            }
           //}
           console.log("Time up!");
           this.gameOver = true;
@@ -154,7 +159,10 @@ export default class GameController {
       }
     } else {
       if (!this.player1.name) {
-        this.player1.name = "G"+ this.generation + "_P1_" + this.player1.characteristics()[0].name + "_" + this.player1.model.breed + "_" + this.player1.fitness();
+        this.player1.name = "G"
+        + this.generation + "_P1_" 
+        + this.player1.characteristics()[0].name + "_" 
+        + this.player1.model.breed + "_" + this.player1.fitness();
       }
       if (!this.player2.name) {
         this.player2.name = "G"+ this.generation + "_P2_" + this.player2.characteristics()[0].name + "_" + this.player2.model.breed + "_" + this.player2.fitness();
