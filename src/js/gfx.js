@@ -22,7 +22,10 @@ export default class Gfx {
       "https://zeke-rts.s3.amazonaws.com/flying_human16x16.png",
       "https://zeke-rts.s3.amazonaws.com/snake_wood_cutter16x16.png",
       "https://zeke-rts.s3.amazonaws.com/snake_knight16x16.png",
-      "https://zeke-rts.s3.amazonaws.com/snake_flying16x16.png"
+      "https://zeke-rts.s3.amazonaws.com/snake_flying16x16.png",
+      "https://zeke-rts.s3.amazonaws.com/tree16x16.png",
+      "https://zeke-rts.s3.amazonaws.com/portal16x16.png",
+      "https://zeke-rts.s3.amazonaws.com/snake_portal16x16.png",
     ];
 
     units.forEach((imgSrc) => {
@@ -36,13 +39,14 @@ export default class Gfx {
         if (!self.images[object.img]) {
           const img = new Image();
           img.onload = () => {
-            // TODO?
+            
           }
           img.src = object.img;
           self.images[object.img] = img;
         }
       });
     });
+    console.log("load!", this.images);
   }
 
   draw() {

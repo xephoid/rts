@@ -17,9 +17,9 @@ export default class GameUI {
         <div> \
         Player1: \
           <select name="player1Type"> \
+            <option value="TENSOR_AI">Tensor AI</option> \
             <option value="HUMAN">Human</option> \
             <option value="DUMB_AI">Dumb AI</option> \
-            <option value="TENSOR_AI">Tensor AI</option> \
           </select> \
           <input type="file" name="player1json" /> \
           <input type="file" name="player1weights" /> \
@@ -29,9 +29,9 @@ export default class GameUI {
         <div> \
         Player 2: \
           <select name="player2Type"> \
+            <option value="TENSOR_AI">Tensor AI</option> \
             <option value="HUMAN">Human</option> \
             <option value="DUMB_AI">Dumb AI</option> \
-            <option value="TENSOR_AI">Tensor AI</option> \
           </select> \
           <input type="file" name="player2json" /> \
           <input type="file" name="player2weights" /> \
@@ -50,13 +50,24 @@ export default class GameUI {
     const gameSettings = document.getElementById("gameSettings");
     console.log(gameSettings.maxGenerations.value);
     startButton.onclick = () => {
+      
       this.controller.setup(gameSettings.maxGenerations.value, 
         gameSettings.speed.value, 
         gameSettings.player1Type.value, 
         gameSettings.player2Type.value,
         [gameSettings.player1json, gameSettings.player1weights], 
-        [gameSettings.player2json, gamesettings.player2weights])
+        [gameSettings.player2json, gameSettings.player2weights]);
+
+      this.gameUI();
       this.controller.start();
+      
+
+      const gameLoop = () => {
+        this.updateUI();
+        this.controller.tick();
+      }
+
+      this.controller.interval = setInterval(gameLoop, 1000/60);
     }
   }
 
@@ -91,7 +102,7 @@ export default class GameUI {
   }
 
   updateUI() {
-
-    this.controller.tick();
+    this.player1Info.innerHTML = this.controller.getPlayerInfo(this.controller.player1) + ` Ticks: ${this.controller.time}`;
+    this.player2Info.innerHTML = this.controller.getPlayerInfo(this.controller.player2);
   }
 }

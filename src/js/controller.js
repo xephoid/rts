@@ -32,7 +32,12 @@ export default class GameController {
   }
 
   start() {
-    this.interval = setInterval(this.tick, 1000/60);
+    console.log("start!");
+    if (this.player1.type === "TENSOR_AI" && this.player2.type === "TENSOR_AI") {
+      for (let i = 0; i < 10; i++) {
+        this.population.push(this.createModel());
+      }
+    }
   }
 
   createPlayer(number, agent, type, files) {
@@ -107,7 +112,7 @@ export default class GameController {
   tick() {
     if (!this.gameOver) {
       this.ticks++;
-      if (this.ticks >= 1) {
+      if (this.ticks >= this.speed) {
         const prevUnitCount = this.totalUnits;
         this.totalUnits = this.player1.unitCount() + this.player2.unitCount() + this.player1.resourceCount() + this.player2.resourceCount() + this.player1.totalKills() + this.player2.totalKills();
         if (prevUnitCount === this.totalUnits) {
@@ -137,8 +142,6 @@ export default class GameController {
           this.gameOver = true;
         }
         
-        this.player1Info.innerHTML = this.getPlayerInfo(this.player1) + ` Ticks: ${this.time}`;
-        this.player2Info.innerHTML = this.getPlayerInfo(this.player2);
         this.ticks = 0;
         this.time++;
         this.player1.think(this.time);

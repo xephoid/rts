@@ -3,7 +3,6 @@ import GameMap from './map';
 import GameController from './controller';
 import GameUI from './ui';
 
-
 Array.prototype.shuffle = function() {
   var i = this.length, j, temp;
   if ( i == 0 ) return this;
