@@ -13,46 +13,59 @@ var BUILD_PATH = path.resolve(ROOT_PATH, 'dist');
 
 var debug = process.env.NODE_ENV !== 'production';
 
-module.exports = {
-  entry: ENTRY_PATH,
-  output: {
-    path: BUILD_PATH,
-    filename: 'bundle.js',
+const config = {
+  mode: process.env.NODE_ENV,
+  entry: {
+    app: ['@babel/polyfill', './js/main']
   },
+  context: SRC_PATH,
   plugins: [
+    // new webpack.DefinePlugin({
+    //   'process.env': {
+    //     NODE_ENV: JSON.stringify(process.env.NODE_ENV || 'development'),
+    //     API_ENV: JSON.stringify(process.env.API_ENV || 'local')
+    //   }
+    // }),
     new HtmlWebpackPlugin({
-      title: 'A terrible RTS game',
-      template: TEMPLATE_PATH
+      publicPath: '/',
+      template: 'index.html'
     }),
-    new ScriptExtHtmlWebpackPlugin({
-      module: ['bundle.js']
-    }),
-    new webpack.DefinePlugin({
-      __DEV__: debug
-    })
   ],
+
   resolve: {
-    root: [JS_PATH, SRC_PATH]
+    extensions: ['.js', '.jsx', '.json', '.ts'],
+    modules: ['node_modules', SRC_PATH]
   },
   module: {
-    loaders: [
+    rules: [
       {
-        test: /\.(js|mjs)$/,
-        include: JS_PATH,
-        exclude: /(node_modules|bower_components)/,
-        loader: 'babel-loader',
-        query: {
-          cacheDirectory: true,
-          presets: ["@babel/preset-env", "@babel/preset-react"]
-        }
+        test: /\.svg$/,
+        use: [
+          {
+            loader: 'babel-loader'
+          },
+          {
+            loader: 'react-svg-loader',
+            options: {
+              jsx: true // true outputs JSX tags
+            }
+          }
+        ]
       },
       {
-        test: /\.glsl$/,
-        include: SHADER_PATH,
-        loader: 'webpack-glsl'
+        test: /\.(woff|woff2|ttf|eot|otf|png|jpg)$/,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 20480,
+              name: 'assets/[hash].[ext]'
+            }
+          }
+        ]
       }
     ]
-  },
-  debug: debug,
-  devtool: debug ? 'eval-source-map' : 'source-map'
-};
+  }
+}
+
+module.exports = config

@@ -40,11 +40,12 @@ export default class GameController {
     }
   }
 
-  createPlayer(number, agent, type, files) {
+  async createPlayer(number, agent, type, files) {
     let player;
     switch (type) {
       case "DUMB_AI": player = new DumbAIPlayer(number, agent); break;
       case "TENSOR_AI": {
+        console.log(files, files[0].files[0], files[1].files[0]);
         const model = await tf.loadLayersModel(
           tf.io.browserFiles([files[0].files[0], files[1].files[0]]));
           player = new TensorPlayer(number, agent, model);
@@ -55,7 +56,7 @@ export default class GameController {
     return player;
   }
 
-  setup(maxGenerations, speed, player1Type, player2Type, player1Files, player2Files) {
+  async setup(maxGenerations, speed, player1Type, player2Type, player1Files, player2Files) {
     this.map = new GameMap(80, 60);
     this.gfx.map = this.map;
     this.ticks = 0;
@@ -73,8 +74,8 @@ export default class GameController {
       this.player1 = new TensorPlayer(1, this.agent1, this.population.pop());
       this.player2 = new TensorPlayer(2, this.agent2, this.population.pop());
     } else {
-      this.player1 = this.createPlayer(1, this.agent1, player1Type, player1Files);
-      this.player2 = this.createPlayer(2, this.agent2, player2Type, player2Files);
+      this.player1 = await this.createPlayer(1, this.agent1, player1Type, player1Files);
+      this.player2 = await this.createPlayer(2, this.agent2, player2Type, player2Files);
     }
 
     const home1 = new GamePortal(home1X, home1Y, this.player1);
@@ -93,10 +94,11 @@ export default class GameController {
     this.totalUnits = 0;
     this.idleTime = 0;
 
-    if (!this.player1.model.gameLoses) {
+
+    if (this.player1.model && !this.player1.model.gameLoses) {
       this.player1.model.gameLoses = 0;
     }
-    if (!this.player2.model.gameLoses) {
+    if (this.player2.model && !this.player2.model.gameLoses) {
       this.player2.model.gameLoses = 0;
     }
   }

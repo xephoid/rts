@@ -49,9 +49,9 @@ export default class GameUI {
 
     const gameSettings = document.getElementById("gameSettings");
     console.log(gameSettings.maxGenerations.value);
-    startButton.onclick = () => {
+    startButton.onclick = async () => {
       
-      this.controller.setup(gameSettings.maxGenerations.value, 
+      await this.controller.setup(gameSettings.maxGenerations.value, 
         gameSettings.speed.value, 
         gameSettings.player1Type.value, 
         gameSettings.player2Type.value,
