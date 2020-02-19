@@ -1,9 +1,10 @@
 var path = require('path');
 var webpack = require('webpack');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');
 
 var ROOT_PATH = path.resolve(__dirname);
-var ENTRY_PATH = path.resolve(ROOT_PATH, 'src/js/main.js');
+var ENTRY_PATH = path.resolve(ROOT_PATH, 'src/js/main.mjs');
 var SRC_PATH = path.resolve(ROOT_PATH, 'src');
 var JS_PATH = path.resolve(ROOT_PATH, 'src/js');
 var TEMPLATE_PATH = path.resolve(ROOT_PATH, 'src/index.html');
@@ -16,12 +17,15 @@ module.exports = {
   entry: ENTRY_PATH,
   output: {
     path: BUILD_PATH,
-    filename: 'bundle.js'
+    filename: 'bundle.js',
   },
   plugins: [
     new HtmlWebpackPlugin({
       title: 'A terrible RTS game',
       template: TEMPLATE_PATH
+    }),
+    new ScriptExtHtmlWebpackPlugin({
+      module: ['bundle.js']
     }),
     new webpack.DefinePlugin({
       __DEV__: debug
@@ -33,13 +37,13 @@ module.exports = {
   module: {
     loaders: [
       {
-        test: /\.js$/,
+        test: /\.(js|mjs)$/,
         include: JS_PATH,
         exclude: /(node_modules|bower_components)/,
-        loader: 'babel',
+        loader: 'babel-loader',
         query: {
           cacheDirectory: true,
-          presets: ['es2015']
+          presets: ["@babel/preset-env", "@babel/preset-react"]
         }
       },
       {
