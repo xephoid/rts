@@ -189,7 +189,7 @@ export default class GameAgent {
       s.behavior.regionY = this.home.y;
     });
 
-    return this.soldiers.lenght > 0;
+    return this.soldiers.length > 0;
   }
 
   defendResources() {
@@ -197,7 +197,7 @@ export default class GameAgent {
       s.behavior.regionX = this.home.treesRegionX;
       s.behavior.regionY = this.home.treesRegionY;
     });
-    return this.soldiers.lenght > 0;
+    return this.soldiers.length > 0;
   }
 
   attack() {
@@ -205,6 +205,6 @@ export default class GameAgent {
       s.behavior.patrolX = this.home.enemiesRegionX;
       s.behavior.patrolY = this.home.enemiesRegionY;
     });
-    return this.soldiers.lenght > 0;
+    return this.soldiers.length > 0;
   }
 }
