@@ -6,7 +6,7 @@ import TensorPlayer from "./players/tensorai";
 import GameMap from "./map";
 import GeneticAlgorithm from './genetic';
 
-const HIDDEN_LAYERS = 100;
+const HIDDEN_LAYERS = 30;
 const HIDDEN_NUERONS = 8;
 const KERNEL = tf.initializers.randomUniform({minval: -1, maxval: 1});
 const ACTIVATION = 'tanh';

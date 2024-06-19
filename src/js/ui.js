@@ -13,7 +13,7 @@ export default class GameUI {
   initialUI() {
     const form = '<form id="gameSettings"> \
         <div>Max Generations: <input name="maxGenerations" value="1000" /></div> \
-        <div>Speed: <input name="speed" value="10" /></div> \
+        <div>Speed: <input name="speed" value="5" /></div> \
         <div> \
         Player1: \
           <select name="player1Type"> \
@@ -23,8 +23,7 @@ export default class GameUI {
           </select> \
           <input type="file" name="player1json" /> \
           <input type="file" name="player1weights" /> \
-        NUERONS? \
-        LAYERS? \
+        Hidden Layers: <input name="layers" value="30" /> \
         </div> \
         <div> \
         Player 2: \
