@@ -1,7 +1,9 @@
 var path = require('path');
+// import path from path;
 var webpack = require('webpack');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
-var ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');
+// import HtmlWebpackPlugin from 'html-webpack-plugin';
+// var ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');
 
 var ROOT_PATH = path.resolve(__dirname);
 var ENTRY_PATH = path.resolve(ROOT_PATH, 'src/js/main.mjs');

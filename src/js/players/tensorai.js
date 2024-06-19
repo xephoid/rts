@@ -13,10 +13,10 @@ const ACTION_NAMES = {
 
 export default class TensorPlayer extends GamePlayer {
 
-  constructor(number, agent, model) {
-    super(number, agent, "TENSOR_AI");
+  constructor(number, agent, model, opponent) {
+    super(number, agent, "TENSOR_AI", opponent);
     this.model = model;
-    this.baseFitness = [0,0,0,0,0,0,0];
+    this.baseFitness =  [0,0,0,0,0,0,0];
     this.useRates = [0,0,0,0,0,0,0,0];
   }
 
@@ -30,7 +30,7 @@ export default class TensorPlayer extends GamePlayer {
       tf.tidy(() => {
         const normalizedResoures = tf.tensor2d(this.normalize(this.agent.home.knownTrees, 1500)).flatten();
         const normalizedEnemies = tf.tensor2d(this.normalize(this.agent.home.knownEnemies, 200)).flatten();
-        const units = tf.tensor1d([this.agent.soldiers.length/100, this.agent.gatherers.length/100, this.agent.explorers.length/100]);
+        const units = tf.tensor1d([this.agent.soldiers.filter(s => s.isAlive()).length/100, this.agent.gatherers.filter(g => g.isAlive()).length/100, this.agent.explorers.filter(e => e.isAlive()).length/100]);
         const input = tf.concat([tf.tensor1d([time/1000, this.agent.home.hp/350, this.agent.home.resources / 1000]), units, normalizedResoures, normalizedEnemies]);
         const output = this.model.predict(input).dataSync();
         let highest = -200, index = 0;
@@ -53,7 +53,10 @@ export default class TensorPlayer extends GamePlayer {
           default: break;
         }
         
-        if (itWorked) this.baseFitness[index]++;
+        if (itWorked) {
+          this.baseFitness[index]++;
+          this.lastAction = ACTION_NAMES[index];
+        }
 
         this.useRates[index]++;
       });
@@ -66,7 +69,7 @@ export default class TensorPlayer extends GamePlayer {
 
   characteristics() {
     return this.useRates.map((r, i) => {
-      return { name: ACTION_NAMES[i] + "_" + r, value: r }
+      return { name: ACTION_NAMES[i] + "_" + r, value: r, success: this.baseFitness[i] }
     }).sort((a, b) => a.value - b.value)
     .reverse();
   }
@@ -86,7 +89,7 @@ export default class TensorPlayer extends GamePlayer {
     // return this.lifespan / 1000
     //   + this.agent.soldiers.reduce((acc, s) => s.kills + acc, 0)
     return this.baseFitness.reduce((acc, v) => acc += (v > 0 ? 1 : 0), 0)
-      + this.useRates.reduce((acc, v) => acc += (v > 0 ? 0.1 : 0), 0)
+      + this.useRates.reduce((acc, v) => acc += (v > 0 ? 1 : 0), 0)
       + (this.agent.home.hp/350) 
       + (this.agent.soldiers.length > 0 ? 1 : 0) 
       + (this.agent.gatherers.length > 0 ? 1: 0) 

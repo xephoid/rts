@@ -2,10 +2,12 @@
   "name": "webgl-webpack-boilerplate",
   "version": "1.2.0",
   "private": true,
-  "type": "module",
   "description": "A terrible RTS game",
+  "browser": {
+    "[module-name]": false 
+  },
   "scripts": {
-    "build": "NODE_ENV=production webpack -p --progress --colors",
+    "build": "NODE_ENV=production webpack -p --progress --colors --display-error-details",
     "watch": "webpack --progress --colors --watch",
     "dev": "webpack-dev-server --content-base dist/ --colors --hot --inline"
   },
@@ -25,7 +27,7 @@
     "html-webpack-plugin": "^3.2.0",
     "script-ext-html-webpack-plugin": "^2.1.4",
     "url-loader": "^3.0.0",
-    "webpack": "^4.41.6",
+    "webpack": "^4.47.0",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.10.3",
     "webpack-glsl-loader": "^1.0.1"

@@ -6,7 +6,7 @@ import TensorPlayer from "./players/tensorai";
 import GameMap from "./map";
 import GeneticAlgorithm from './genetic';
 
-const HIDDEN_LAYERS = 3;
+const HIDDEN_LAYERS = 100;
 const HIDDEN_NUERONS = 8;
 const KERNEL = tf.initializers.randomUniform({minval: -1, maxval: 1});
 const ACTIVATION = 'tanh';
@@ -23,7 +23,7 @@ export default class GameController {
     this.oldPlayers = [];
     
     for (let i = 0; i < 10; i++) {
-      this.population.push(this.createModel());
+      this.population.push(this.createModel(null, "O"));
     }
 
     this.ga = new GeneticAlgorithm(this.population);
@@ -33,25 +33,33 @@ export default class GameController {
 
   start() {
     console.log("start!");
-    if (this.player1.type === "TENSOR_AI" && this.player2.type === "TENSOR_AI") {
-      for (let i = 0; i < 10; i++) {
-        this.population.push(this.createModel(null, "O"));
-      }
-    }
+    // if (this.player1.type === "TENSOR_AI" || this.player2.type === "TENSOR_AI") {
+    //   for (let i = 0; i < 10; i++) {
+    //     this.population.push(this.createModel(null, "O"));
+    //   }
+    // }
   }
 
   async createPlayer(number, agent, type, files) {
     let player;
     switch (type) {
-      case "DUMB_AI": player = new DumbAIPlayer(number, agent); player.name = "Idiot"; break;
       case "TENSOR_AI": {
-        console.log(files, files[0].files[0], files[1].files[0]);
-        const model = await tf.loadLayersModel(
-          tf.io.browserFiles([files[0].files[0], files[1].files[0]]));
-        model.breed = "L";
-        player = new TensorPlayer(number, agent, model);
+        this.shuffle(this.population);
+        if (!files || !files[0].files[0]) {
+          player = new TensorPlayer(number, agent, this.population.pop());
+        } else {
+          console.log("Loading...", files, files[0].files[0], files[1].files[0]);
+          const model = await tf.loadLayersModel(
+            tf.io.browserFiles([files[0].files[0], files[1].files[0]]));
+          model.breed = "L";
+          player = new TensorPlayer(number, agent, model);
+          for (let i = 0; i < 5; i++) {
+            this.population.push(this.mutateWinners([player.model], 'X'));
+          }
+        }
         break;
       }
+      case "DUMB_AI": player = new DumbAIPlayer(number, agent); player.name = "Idiot"; break;
       default: player = new GamePlayer(number, agent); player.name = "Puny Human"; break;
     }
     return player;
@@ -70,14 +78,10 @@ export default class GameController {
     this.agent1 = new GameAgent(this.map);
     this.agent2 = new GameAgent(this.map);
 
-    if (player1Type === "TENSOR_AI" && player2Type === "TENSOR_AI") {
-      this.shuffle(this.population);
-      this.player1 = new TensorPlayer(1, this.agent1, this.population.pop());
-      this.player2 = new TensorPlayer(2, this.agent2, this.population.pop());
-    } else {
-      this.player1 = await this.createPlayer(1, this.agent1, player1Type, player1Files);
-      this.player2 = await this.createPlayer(2, this.agent2, player2Type, player2Files);
-    }
+    
+    this.player1 = await this.createPlayer(1, this.agent1, player1Type, player1Files);
+    this.player2 = await this.createPlayer(2, this.agent2, player2Type, player2Files, this.player1);
+    this.player1.opponent = this.player2;
 
     const home1 = new GamePortal(home1X, home1Y, this.player1);
     const home2 = new GamePortal(home2X, home2Y, this.player2);
@@ -102,6 +106,8 @@ export default class GameController {
     if (this.player2.model && !this.player2.model.gameLoses) {
       this.player2.model.gameLoses = 0;
     }
+    // console.log('Agent 1', this.agent1);
+    // console.log('Agent 2', this.agent2);
   }
 
   getPlayerInfo(player) {
@@ -109,7 +115,11 @@ export default class GameController {
     const gatherers = player.agent.gatherers.filter(g => g.isAlive()).length;
     const explorers = player.agent.explorers.filter(e => e.isAlive()).length;
     const soldiers = player.agent.soldiers.filter(s => s.isAlive()).length;
-    return `Resources: ${resources} Gatherers: ${gatherers} Explorers: ${explorers} Soldiers: ${soldiers} Health: ${player.agent.home.hp}/350`;
+    return `{${player.model ? player.model.breed : 'NA'}} Resources: ${resources} ` 
+      + `Gatherers: ${gatherers}/${player.agent.gatherers.length} `
+      + `Explorers: ${explorers}/${player.agent.explorers.length} ` 
+      + `Soldiers: ${soldiers}/${player.agent.soldiers.length} `
+      + `Health: ${player.agent.home.hp}/350  [${player.lastAction}]`;
   }
 
   tick() {
@@ -126,14 +136,24 @@ export default class GameController {
         if (!this.player1.agent.home.isAlive()) {
           //document.getElementById("player2wins").style.display = "block";
           console.log("Player 2 wins!");
-          this.player1.model.gameLoses++;
+          if (this.player1.model) {
+            this.player1.model.gameLoses++;
+          }
+          if (this.player2.model) {
+            this.player2.model.gameLoses -= 1;
+          }
           this.gameOver = true;
         } else if (!this.player2.agent.home.isAlive()) {
           //document.getElementById("player1wins").style.display = "block";
           console.log("Player 1 wins!");
-          this.player2.model.gameLoses++;
+          if (this.player2.model) {
+            this.player2.model.gameLoses++;
+          }
+          if (this.player1.model) {
+            this.player1.model.gameLoses -= 1;
+          }
           this.gameOver = true;
-        } else if (this.idleTime > 300 || this.time > 600 + (this.generation * 50)) {
+        } else if (this.idleTime > 300 || this.time > 1000) {
           //document.getElementById("player1wins").innerHTML = "<h1>Time up!</h1>";
           //document.getElementById("player1wins").style.display = "block";
           //if (this.player2.fitness() < this.player1.fitness()) {
@@ -158,25 +178,36 @@ export default class GameController {
         this.gfx.draw();
       }
     } else {
-      if (!this.player1.name) {
+      // if (!this.player1.name) {
         this.player1.name = "G"
         + this.generation + "_P1_" 
         + this.player1.characteristics()[0].name + "_" 
         + this.player1.model.breed + "_" + this.player1.fitness();
-      }
-      if (!this.player2.name) {
-        this.player2.name = "G"+ this.generation + "_P2_" + this.player2.characteristics()[0].name + "_" + this.player2.model.breed + "_" + this.player2.fitness();
-      }
+      // }
+      // if (!this.player2.name) {
+        this.player2.name = "G"
+          + this.generation 
+          + "_P2_" 
+          + this.player2.characteristics()[0].name 
+          + "_" + this.player2.model.breed 
+          + "_" + this.player2.fitness();
+      // }
 
-      console.log(this.player1.name, this.player2.name, this.player1.characteristics(), this.player2.characteristics());
-
-      this.oldPlayers.push(this.player1);
-      this.oldPlayers.push(this.player2);
-      this.shuffle(this.oldPlayers);
+      if (this.player1.type === "TENSOR_AI" && !this.player1.old) {
+        this.oldPlayers.push(this.player1);
+        this.player1.old = true;
+      }
+      console.log(this.player1.name, this.player1.characteristics());
+      if (this.player2.type === "TENSOR_AI" && !this.player2.old) {
+        this.oldPlayers.push(this.player2);
+        this.player2.old = true;
+      }
+      console.log(this.player2.name, this.player2.characteristics());
+      // this.shuffle(this.oldPlayers);
       if (this.population.length < 1) {
         this.winners = this.oldPlayers.sort((a, b) => a.fitness() - b.fitness()).reverse().slice(0, 4);
-        this.winners.filter(w => w.fitness() > 8.5).filter(w => !w.saved).forEach(w => {
-          w.model.save("downloads://rts\/" + w.name)
+        this.winners.filter(w => w.fitness() > 50).filter(w => !w.saved).forEach(w => {
+          w.model.save("downloads://" + w.name);
           w.saved = true;
         });
         console.log("winners", this.winners.map(w => w.name));
@@ -197,13 +228,7 @@ export default class GameController {
   evolvePopulation(winners) {
     console.log("Evolving...", winners);
  
-    const mutatedWinners = winners.slice(0, 2)
-      .map(winner => winner.getWeights().map(w => this.ga.mutate(w)))
-      .map(weights => {
-        const m = this.createModel(null, "M");
-        weights.forEach((w, i) => m.weights[i] = tf.tidy(() => m.weights[i].write(w)));
-        return m;
-      });
+    const mutatedWinners = this.mutateWinners(winners);
     //const mutatedWinners = this.mutateBias(winners);
  
     this.population = [
@@ -212,6 +237,16 @@ export default class GameController {
       this.createModel(null, "N"),
       this.createModel(null, "N"),
       ...winners.slice(0, 4), ...mutatedWinners];
+  }
+
+  mutateWinners(winners, breed) {
+    return winners.slice(0, 2)
+      .map(winner => winner.getWeights().map(w => this.ga.mutate(w)))
+      .map(weights => {
+        const m = this.createModel(null, breed ? breed : 'M');
+        weights.forEach((w, i) => m.weights[i] = tf.tidy(() => m.weights[i].write(w)));
+        return m;
+      });
   }
 
   crossOver(a, b) {
