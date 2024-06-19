@@ -7,6 +7,6 @@ export default class GamePortal extends GameObject {
       350, 0, 1000);
     this.regionX = x;
     this.regionY = y;
-    this.resources = 50;
+    this.resources = 55;
   }
 }

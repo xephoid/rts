@@ -1,11 +1,13 @@
 export default class GamePlayer {
 
-  constructor(number, agent, type) {
+  constructor(number, agent, type, opponent) {
     this.number = number;
     this.agent = agent;
     this.name = null;
     this.loses = 0;
-    this.type = type || "HUMAN";
+    this.type = type ? type : "HUMAN";
+    this.opponent = opponent;
+    this.lastAction = '';
   }
 
   think() {

@@ -3,8 +3,11 @@
   "version": "1.2.0",
   "private": true,
   "description": "A terrible RTS game",
+  "browser": {
+    "[module-name]": false 
+  },
   "scripts": {
-    "build": "NODE_ENV=production webpack -p --progress --colors",
+    "build": "NODE_ENV=production webpack -p --progress --colors --display-error-details",
     "watch": "webpack --progress --colors --watch",
     "dev": "webpack-dev-server --content-base dist/ --colors --hot --inline"
   },
@@ -15,13 +18,18 @@
     "url": ""
   },
   "devDependencies": {
-    "babel-core": "^6.1.19",
-    "babel-loader": "^6.1.0",
+    "@babel/core": "^7.8.4",
+    "@babel/polyfill": "^7.8.3",
+    "@babel/preset-env": "^7.8.4",
+    "@babel/preset-es2015": "^7.0.0-beta.53",
+    "babel-loader": "^8.0.6",
     "babel-preset-es2015": "^6.1.18",
-    "html-webpack-plugin": "^2.8.1",
+    "html-webpack-plugin": "^3.2.0",
+    "script-ext-html-webpack-plugin": "^2.1.4",
     "url-loader": "^3.0.0",
-    "webpack": "^1.12.4",
-    "webpack-dev-server": "^1.12.1",
+    "webpack": "^4.47.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3",
     "webpack-glsl-loader": "^1.0.1"
   }
 }

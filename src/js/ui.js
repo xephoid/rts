@@ -49,9 +49,9 @@ export default class GameUI {
 
     const gameSettings = document.getElementById("gameSettings");
     console.log(gameSettings.maxGenerations.value);
-    startButton.onclick = () => {
+    startButton.onclick = async () => {
       
-      this.controller.setup(gameSettings.maxGenerations.value, 
+      await this.controller.setup(gameSettings.maxGenerations.value, 
         gameSettings.speed.value, 
         gameSettings.player1Type.value, 
         gameSettings.player2Type.value,
@@ -75,22 +75,22 @@ export default class GameUI {
     const div = document.getElementById("interaction1");
     div.innerHTML = '';
     if (this.controller.player1.type === "HUMAN") {
-      this.createButton(div, "Defend", () => this.agent1.defendHome());
-      this.createButton(div, "Resources", () => this.agent1.defendResources());
-      this.createButton(div, "Gatherer (15)", () => this.agent1.createGatherer());
-      this.createButton(div, "Explorer (20)", () => this.agent1.createExplorer());
-      this.createButton(div, "Soldier (50)", () => this.agent1.createSoldier());
-      this.createButton(div, "Attack!", () => this.agent1.attack());
+      this.createButton(div, "Defend", () => this.controller.agent1.defendHome());
+      this.createButton(div, "Resources", () => this.controller.agent1.defendResources());
+      this.createButton(div, "Gatherer (15)", () => this.controller.agent1.createGatherer());
+      this.createButton(div, "Explorer (20)", () => this.controller.agent1.createExplorer());
+      this.createButton(div, "Soldier (50)", () => this.controller.agent1.createSoldier());
+      this.createButton(div, "Attack!", () => this.controller.agent1.attack());
     }
 
     const div2 = document.getElementById("interaction2");
     div2.innerHTML = '';
     if (this.controller.player2.type === "HUMAN") {
-      this.createButton(div2, "Region", () => this.agent2.setResourceRegion());
-      this.createButton(div2, "Gatherer", () => this.agent2.createGatherer());
-      this.createButton(div2, "Explorer", () => this.agent2.createExplorer());
-      this.createButton(div2, "Soldier", () => this.agent2.createSoldier());
-      this.createButton(div2, "Attack!", () => this.agent2.attack());
+      this.createButton(div2, "Region", () => this.controller.agent2.setResourceRegion());
+      this.createButton(div2, "Gatherer", () => this.controller.agent2.createGatherer());
+      this.createButton(div2, "Explorer", () => this.controller.agent2.createExplorer());
+      this.createButton(div2, "Soldier", () => this.controller.agent2.createSoldier());
+      this.createButton(div2, "Attack!", () => this.controller.agent2.attack());
     }
 
     this.player1Info = document.createElement("div");
