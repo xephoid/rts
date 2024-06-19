@@ -13,7 +13,7 @@ export default class GameUI {
   initialUI() {
     const form = '<form id="gameSettings"> \
         <div>Max Generations: <input name="maxGenerations" value="1000" /></div> \
-        <div>Speed: <input name="speed" value="5" /></div> \
+        <div>Speed: <input type="range" min="1" max="10" name="speed" value="1" /></div> \
         <div> \
         Player1: \
           <select name="player1Type"> \
@@ -55,7 +55,9 @@ export default class GameUI {
         gameSettings.player1Type.value, 
         gameSettings.player2Type.value,
         [gameSettings.player1json, gameSettings.player1weights], 
-        [gameSettings.player2json, gameSettings.player2weights]);
+        [gameSettings.player2json, gameSettings.player2weights],
+        parseInt(gameSettings.layers.value)
+      );
 
       this.gameUI();
       this.controller.start();
