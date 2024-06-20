@@ -28,15 +28,6 @@ export default class GameController {
 
   start() {
     console.log("start!", this.hiddenLayers);
-    const toShuffle = [1,2,3,4,5,6,7,8,9,10];
-    this.shuffle(toShuffle);
-    console.log(toShuffle);
-    this.shuffle(toShuffle);
-    console.log(toShuffle);
-    this.shuffle(toShuffle);
-    console.log(toShuffle);
-    this.shuffle(toShuffle);
-    console.log(toShuffle);
   }
 
   async createPlayer(number, agent, type, files) {
@@ -145,7 +136,8 @@ export default class GameController {
             this.player1.model.gameLoses++;
           }
           if (this.player2.model) {
-            this.player2.model.gameLoses -= 1;
+            this.player2.model.winner = true;
+            this.player2.model.gameLoses--;
           }
           this.gameOver = true;
         } else if (!this.player2.agent.home.isAlive()) {
@@ -155,7 +147,8 @@ export default class GameController {
             this.player2.model.gameLoses++;
           }
           if (this.player1.model) {
-            this.player1.model.gameLoses -= 1;
+            this.player1.model.winner = true;
+            this.player1.model.gameLoses--;
           }
           this.gameOver = true;
         } else if (this.idleTime > 300 || this.time > 1000) {
@@ -183,34 +176,33 @@ export default class GameController {
         this.gfx.draw();
       }
     } else {
-      // if (!this.player1.name) {
-        this.player1.name = "G"
+      
+      if (this.player1.type === "TENSOR_AI" && !this.player1.model.old) {
+        this.oldPlayers.push(this.player1);
+        this.player1.model.name = "G"
         + this.generation + "_P1_" 
         + this.player1.characteristics()[0].name + "_" 
         + (this.player1.model ? this.player1.model.breed : 'D') + "_" 
         + this.player1.fitness() + "_"
         + this.hiddenLayers;
-      // }
-      // if (!this.player2.name) {
-        this.player2.name = "G"
+        this.player1.model.old = true;
+        console.log(this.player1.model.name, this.player1.characteristics());
+      }
+
+      
+      if (this.player2.type === "TENSOR_AI" && !this.player2.model.old) {
+        this.oldPlayers.push(this.player2);
+        this.player2.model.name = "G"
           + this.generation 
           + "_P2_" 
           + this.player2.characteristics()[0].name 
           + "_" + (this.player2.model ? this.player2.model.breed : 'D')
           + "_" + this.player2.fitness() + "_"
           + this.hiddenLayers;
-      // }
-
-      if (this.player1.type === "TENSOR_AI" && !this.player1.old) {
-        this.oldPlayers.push(this.player1);
-        this.player1.old = true;
+        this.player2.model.old = true;
+        console.log(this.player2.model.name, this.player2.characteristics());
       }
-      console.log(this.player1.name, this.player1.characteristics());
-      if (this.player2.type === "TENSOR_AI" && !this.player2.old) {
-        this.oldPlayers.push(this.player2);
-        this.player2.old = true;
-      }
-      console.log(this.player2.name, this.player2.characteristics());
+      
       // this.shuffle(this.oldPlayers);
       if (this.population.length < 1) {
         this.winners = this.oldPlayers.sort((a, b) => a.fitness() - b.fitness()).reverse().slice(0, 4);
@@ -218,7 +210,7 @@ export default class GameController {
           w.model.save("downloads://" + w.name);
           w.saved = true;
         });
-        console.log("winners", this.winners.map(w => w.name));
+        console.log("winners", this.winners.map(w => { return  {name: w.model.name, fitness: w.fitness(), gameLoses: w.model.gameLoses} } ));
         this.shuffle(this.winners);
         this.evolvePopulation(this.winners.map(w => w.model));
         this.generation++;

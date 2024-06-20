@@ -88,14 +88,16 @@ export default class TensorPlayer extends GamePlayer {
       //+ this.total(this.agent.home.knownTrees)
     // return this.lifespan / 1000
     //   + this.agent.soldiers.reduce((acc, s) => s.kills + acc, 0)
-    return this.baseFitness.reduce((acc, v) => acc += (v > 0 ? 1 : 0), 0)
-      + this.useRates.reduce((acc, v) => acc += (v > 0 ? 1 : 0), 0)
+
+    return this.baseFitness.reduce((acc, v, i) => acc += (this.useRates[i] > 0 ? v / this.useRates[i] : 0), 0)
+      // + this.useRates.reduce((acc, v) => acc += (v > 0 ? 1 : 0), 0)
       + (this.agent.home.hp/350) 
-      + (this.agent.soldiers.length > 0 ? 1 : 0) 
-      + (this.agent.gatherers.length > 0 ? 1: 0) 
-      + (this.agent.explorers.length > 0 ? 1 : 0)
+      + (this.agent.soldiers.length > 0 ? (this.agent.soldiers.filter(s => s.isAlive()).length / this.agent.soldiers.length) : 0)
+      + (this.agent.gatherers.length > 0 ? (this.agent.gatherers.filter(s => s.isAlive()).length / this.agent.gatherers.length) : 0)
+      + (this.agent.explorers.length > 0 ? (this.agent.explorers.filter(s => s.isAlive()).length / this.agent.explorers.length) : 0)
       + (this.agent.soldiers.reduce((acc, s) => s.kills + acc, 0) / 1000)
       + (this.agent.home.resources/10000)
+      - (this.lifespan / 1000)
       - this.model.gameLoses;
   }
 }
