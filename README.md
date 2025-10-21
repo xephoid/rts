@@ -44,9 +44,9 @@ npm i // lol!
 Probably the easiest way to use is to just run it with the two AIs. For that just click the Start button and enjoy!
 
 Options:
-- Max Generations: The way genetic algorithms work is you generate a bunch of random nueral networks (NNs) and have them compete and then give each a "fitness" rating. The "fittest" NNs get "promoted" to the next generation of NNs along with corssbread and mutated versions of the "fittest". You can use this to limit the number of generations you wan to see. OR you can just close the window...
+- Max Generations: The way genetic algorithms work is you generate a bunch of random nueral networks (NNs) and have them compete and then give each a "fitness" rating. The "fittest" NNs get "promoted" to the next generation of NNs along with corssbread and mutated versions of the "fittest". You can use this to limit the number of generations you want to see. OR you can just close the window...
 - Speed: Depending on the number of hidden layers the AIs can go prettys fast and it can be hard to see what is happening. This helps slow things down. Higher is slower. You probably don't need to go higher than 10 to play against the AI. Less than 1 won't work.
-- Player 1/2: Pretty self explaianatory. You pick which type of player. Technically you can do Human vs Human, but doesn't work great since you need to share a the mouse. Maybe could work on a touch screen?
+- Player 1/2: Pretty self explaianatory. You pick which type of player. Technically you can do Human vs Human, but doesn't work great since you need to share the mouse. Maybe could work on a touch screen?
 - Player "Choose File" inputs: If the AIs reach a certain level of fitness it will ask if you want to save them. TensorJS generates two files for each model a json file and a weights.bin file. You can load them for each player using these inputs. Left to right the first one is for the json file and the second is for the weights.bin file. There are some sample winners in the repo.
 - Hidden layers: The "magic" of nueral nets is that the more layers there are the "smarter" the AI can be, but it also has a performance cost. I don't recommend going above 100.
 
